@@ -91,7 +91,7 @@ contract PCMStake is PCMStakeBase {
     uint256 constant public MAX_STAKE_COUNT = 20;
     uint256 constant public MIN_STAKE_AMOUNT = 10 ether;
 
-    uint256 immutable public luanchTime;
+    uint256 immutable public launchTime;
     uint256 public stakeId = 0;
 
     mapping(StakeType => StakeReward) private stakeData;
@@ -101,7 +101,7 @@ contract PCMStake is PCMStakeBase {
 
     constructor(address _token) Ownable(_msgSender()) {
         token = IERC20(_token);
-        luanchTime = block.timestamp;
+        launchTime = block.timestamp;
         initdata();
     }
 
@@ -225,6 +225,18 @@ contract PCMStake is PCMStakeBase {
     }
 
     /**
+    * getAprAndLimit
+    */
+    function getAprAndLimit(StakeType _type) public view returns (uint256,uint256) {
+        (uint256 _year, uint256 _month) = getYearsMonth();
+        StakeReward memory _stakeData = stakeData[_type];
+        uint256 apr = _stakeData.apr[_year-1];
+        uint256 _index = (_year-1) * 12 + (_month - 1);
+        uint256 limit = stakeData[_type].limit[_index];
+        return (apr,limit);
+    }
+
+    /**
      * @dev Stake tokens to earn rewards
      */
     function stake(StakeType _type, uint256 _amount) public {
@@ -291,8 +303,8 @@ contract PCMStake is PCMStakeBase {
      * @dev Get years and month since the contract was launched
      */
     function getYearsMonth() public view returns (uint256, uint256) {
-        uint256 _years = (block.timestamp - luanchTime) / 365 days + 1;
-        uint256 _month = (block.timestamp - luanchTime) % 365 days / 30 days + 1;
+        uint256 _years = (block.timestamp - launchTime) / 365 days + 1;
+        uint256 _month = (block.timestamp - launchTime) % 365 days / 30 days + 1;
         if (_month == 13) {
             _month = 12; // process the 361-365 days
         }
