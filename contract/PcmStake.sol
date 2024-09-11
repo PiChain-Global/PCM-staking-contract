@@ -99,7 +99,7 @@ contract PCMStake is PCMStakeBase {
     mapping(uint256 => StakeDetails) public stakes;
     mapping(uint256 => mapping(StakeType => uint256)) public staked;
 
-    constructor(address _token) Ownable(_msgSender()) {
+    constructor(address _token,address _owner) Ownable(_owner) {
         token = IERC20(_token);
         launchTime = block.timestamp;
         initdata();
